@@ -11,40 +11,45 @@ from e_wallets.models import Wallet, Transaction
 from e_wallets.serializers import TransactionSerializer, WalletSerializer
 
 
-class TransactionView(APIView):
-    serializer_class = TransactionSerializer
+class TransactionView(ModelViewSet):
+    queryset =  Transaction.objects.all()
+    serializer_class = TransactionActivitySerializer
 
-    def post(self, request, *args, **kwargs):
-        sender_wallet_number = request.data.get('sender_wallet_number')
-        receiver_wallet_number = request.data.get('receiver_wallet_number')
-        transfer_amount = Decimal(request.data.get('amount'))
 
-        sender_wallet = get_object_or_404(Wallet, wallet_number=sender_wallet_number)
-        receiver_wallet = get_object_or_404(Wallet, wallet_number=receiver_wallet_number)
 
-        if sender_wallet.balance < transfer_amount:
-            return Response({'message': 'Insufficient balance'}, status=status.HTTP_400_BAD_REQUEST)
 
-        sender_wallet.balance -= transfer_amount
-        receiver_wallet.balance += transfer_amount
 
-        sender_wallet.save()
-        receiver_wallet.save()
-
-        Transaction.objects.create(
-            type='DEBIT',
-            status='SUCCESSFUL',
-            amount=transfer_amount,
-            wallet=sender_wallet,
-        )
-        Transaction.objects.create(
-            type='CREDIT',
-            status='SUCCESSFUL',
-            amount=transfer_amount,
-            wallet=receiver_wallet,
-        )
-
-        return Response({'message': 'Transfer successful'}, status=status.HTTP_200_OK)
+    # def post(self, request, *args, **kwargs):
+    #     sender_wallet_number = request.data.get('wallet_number')
+    #     receiver_wallet_number = request.data.get('wallet_number')
+    #     transfer_amount = Decimal(request.data.get('amount'))
+    #
+    #     sender_wallet = get_object_or_404(Wallet, wallet_number=sender_wallet_number)
+    #     receiver_wallet = get_object_or_404(Wallet, wallet_number=receiver_wallet_number)
+    #
+    #     if sender_wallet.balance < transfer_amount:
+    #         return Response({'message': 'Insufficient balance'}, status=status.HTTP_400_BAD_REQUEST)
+    #
+    #     sender_wallet.balance -= transfer_amount
+    #     receiver_wallet.balance += transfer_amount
+    #
+    #     sender_wallet.save()
+    #     receiver_wallet.save()
+    #
+    #     Transaction.objects.create(
+    #         type='DEBIT',
+    #         status='SUCCESSFUL',
+    #         amount=transfer_amount,
+    #         wallet=sender_wallet,
+    #     )
+    #     Transaction.objects.create(
+    #         type='CREDIT',
+    #         status='SUCCESSFUL',
+    #         amount=transfer_amount,
+    #         wallet=receiver_wallet,
+    #     )
+    #
+    #     return Response({'message': 'Transfer successful'}, status=status.HTTP_200_OK)
 
 #     class WithdrawView(APIView):
 #         def post(self, request, *args, **kwargs):
@@ -55,7 +60,7 @@ class TransactionView(APIView):
 #
 #             if wallet.balance < withdrawal_amount:
 #                 return Response({'message': 'Insufficient balance'}, status=status.HTTP_400_BAD_REQUEST)
-#
+
 #             wallet.balance -= withdrawal_amount
 #             wallet.save()
 #
